@@ -1,12 +1,13 @@
 import { Request, Response } from 'express'
-import { getRepository } from 'typeorm'
+import { getCustomRepository, getRepository } from 'typeorm'
 import User from '../models/user'
+import { UsersRepository } from '../repositories/UsersRepository'
 
 export default {
   async create(req: Request, res: Response){
     const { name, email } = req.body
 
-    const userRepository = getRepository(User)
+    const userRepository = getCustomRepository(UsersRepository)
 
     const newUser = userRepository.create({name, email})
 
@@ -21,10 +22,25 @@ export default {
   },
 
   async index(req: Request, res: Response){
-    const userRepository = getRepository(User)
+    const userRepository = getCustomRepository(UsersRepository)
 
     const users = await userRepository.find()
 
     res.status(200).json(users)
+  },
+
+  async show(req: Request, res: Response){
+
+    const {id} = req.params
+
+    const userRepository = getRepository(User)
+
+    const user = await userRepository.findOneOrFail(id)
+
+    if(user === undefined){
+      res.status(404).json({message: "User not found"})
+    }else{
+      res.status(200).json(user)
+    }
   }
 }

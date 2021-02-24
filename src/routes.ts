@@ -7,6 +7,8 @@ const routes = Router()
 routes.post('/users', usersController.create)
 routes.get('/users', usersController.index)
 routes.get('/users/:id', usersController.show)
+
 routes.post('/surveys', surveysController.create)
+routes.get('/surveys', surveysController.index)
 
 export default routes

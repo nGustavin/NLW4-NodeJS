@@ -17,7 +17,7 @@ export default {
       res.status(400).json({Message: `User with email ${email} already exists`})
     }else{
       const users = await userRepository.save(newUser)
-      res.status(200).json({message: `Usuario ${name} criado com sucesso!`, users})
+      res.status(201).json({message: `Usuario ${name} criado com sucesso!`, users})
     }
   },
 

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { resolve } from 'path'
 import { getCustomRepository } from 'typeorm'
 import { SurveysRepository } from '../repositories/SurveysRepository'
 import { SurveysUsersRepository } from '../repositories/SurveysUsersRepository'
@@ -30,9 +31,17 @@ export default {
       survey_id
     })
 
+    const variables = {
+      name: userAlreadyExists.name,
+      title: surveyAlreadyExists.title,
+      description: surveyAlreadyExists.description
+    }
+
+    const npsPath = resolve(__dirname, "..", "views", "emails", "npsMail.hbs")
+
     await surveysUsersRepository.save(surveyUser)
 
-    await SendMailService.execute(email, surveyAlreadyExists.title, surveyAlreadyExists.description)
+    await SendMailService.execute(email, surveyAlreadyExists.title, variables, npsPath)
 
     return res.json(surveyUser)
   }, 

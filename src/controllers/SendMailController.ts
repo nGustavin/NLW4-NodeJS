@@ -14,34 +14,48 @@ export default {
     const surveysRepository = getCustomRepository(SurveysRepository)
     const surveysUsersRepository = getCustomRepository(SurveysUsersRepository)
 
-    const userAlreadyExists = await usersRepository.findOneOrFail({ email })
 
-    if(!userAlreadyExists){
+    const user = await usersRepository.findOneOrFail({ email })
+
+    if(!user){
       return res.status(400).json({error: "User does not exist"})
     }
 
-    const surveyAlreadyExists = await surveysRepository.findOneOrFail({ id: survey_id })
+    const survey = await surveysRepository.findOneOrFail({ id: survey_id })
 
-    if(!surveyAlreadyExists){
+    if(!survey){
       return res.status(400).json({error: "Survey does not exist"})
     }
 
-    const surveyUser = await surveysUsersRepository.create({
-      user_id: userAlreadyExists.id,
-      survey_id
+    const variables = {
+      name: user.name,
+      title: survey.title,
+      description: survey.description,
+      user_id: user.id,
+      link: process.env.URL_MAIL
+    }
+    const npsPath = resolve(__dirname, "..", "views", "emails", "npsMail.hbs")
+
+
+    const surveyuser = await surveysUsersRepository.findOne({
+      where: [{user_id: user.id},{value: null}],
+      relations: ["user", "survey"]
     })
 
-    const variables = {
-      name: userAlreadyExists.name,
-      title: surveyAlreadyExists.title,
-      description: surveyAlreadyExists.description
+    if(surveyuser){
+      await SendMailService.execute(email, survey.title, variables, npsPath)
+      return res.json(surveyuser)
     }
 
-    const npsPath = resolve(__dirname, "..", "views", "emails", "npsMail.hbs")
+    const surveyUser = surveysUsersRepository.create({
+      user_id: user.id,
+      survey_id
+    })
+    
 
     await surveysUsersRepository.save(surveyUser)
 
-    await SendMailService.execute(email, surveyAlreadyExists.title, variables, npsPath)
+    await SendMailService.execute(email, survey.title, variables, npsPath)
 
     return res.json(surveyUser)
   }, 

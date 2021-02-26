@@ -27,13 +27,9 @@ export default {
       return res.status(400).json({error: "Survey does not exist"})
     }
 
-    const variables = {
-      name: user.name,
-      title: survey.title,
-      description: survey.description,
-      user_id: user.id,
-      link: process.env.URL_MAIL
-    }
+    
+
+
     const npsPath = resolve(__dirname, "..", "views", "emails", "npsMail.hbs")
 
 
@@ -42,7 +38,16 @@ export default {
       relations: ["user", "survey"]
     })
 
+    const variables = {
+      name: user.name,
+      title: survey.title,
+      description: survey.description,
+      id: "",
+      link: process.env.URL_MAIL
+    }
+
     if(surveyuser){
+      variables.id = surveyuser.id
       await SendMailService.execute(email, survey.title, variables, npsPath)
       return res.json(surveyuser)
     }
@@ -54,6 +59,8 @@ export default {
     
 
     await surveysUsersRepository.save(surveyUser)
+
+    variables.id = surveyUser.id
 
     await SendMailService.execute(email, survey.title, variables, npsPath)
 

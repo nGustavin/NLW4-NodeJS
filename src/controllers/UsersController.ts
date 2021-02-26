@@ -4,6 +4,7 @@ import User from '../models/user'
 import { UsersRepository } from '../repositories/UsersRepository'
 
 import * as yup from 'yup'
+import { AppError } from '../errors/AppErrors'
 
 export default {
   async create(req: Request, res: Response){
@@ -16,7 +17,7 @@ export default {
     try {
       await schema.validate(req.body, {abortEarly: false})
     } catch (err) {
-      return res.status(400).json({error: err})
+      throw new AppError(err)
     }
 
     const { name, email } = req.body
@@ -52,7 +53,7 @@ export default {
     const user = await userRepository.findOneOrFail(id)
 
     if(user === undefined){
-      res.status(404).json({message: "User not found"})
+      throw new AppError("User not found!")
     }else{
       res.status(200).json(user)
     }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { resolve } from 'path'
 import { getCustomRepository } from 'typeorm'
+import { AppError } from '../errors/AppErrors'
 import { SurveysRepository } from '../repositories/SurveysRepository'
 import { SurveysUsersRepository } from '../repositories/SurveysUsersRepository'
 import { UsersRepository } from '../repositories/UsersRepository'
@@ -18,13 +19,13 @@ export default {
     const user = await usersRepository.findOneOrFail({ email })
 
     if(!user){
-      return res.status(400).json({error: "User does not exist"})
+      throw new AppError("User does not exists!")
     }
 
     const survey = await surveysRepository.findOneOrFail({ id: survey_id })
 
     if(!survey){
-      return res.status(400).json({error: "Survey does not exist"})
+      throw new AppError("Survey does not exists!")
     }
 
     

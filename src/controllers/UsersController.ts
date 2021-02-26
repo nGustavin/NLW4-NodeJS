@@ -3,8 +3,22 @@ import { getCustomRepository, getRepository } from 'typeorm'
 import User from '../models/user'
 import { UsersRepository } from '../repositories/UsersRepository'
 
+import * as yup from 'yup'
+
 export default {
   async create(req: Request, res: Response){
+
+    const schema = yup.object().shape({
+      name: yup.string().required(),
+      email: yup.string().email().required(),
+    })
+
+    try {
+      await schema.validate(req.body, {abortEarly: false})
+    } catch (err) {
+      return res.status(400).json({error: err})
+    }
+
     const { name, email } = req.body
 
     const userRepository = getCustomRepository(UsersRepository)
